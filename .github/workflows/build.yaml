@@ -1,0 +1,38 @@
+name: Build and Push Windows Python Docker Image
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-and-push:
+    runs-on: windows-latest
+    environment: prod
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Login to DockerHub
+      uses: docker/login-action@v3
+      with:
+        username: bobbyiliev
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    - name: Build Docker image
+      run: |
+        docker build -t bobbyiliev/windows-python:latest .
+      shell: powershell
+
+    - name: Push Docker image
+      run: |
+        docker push bobbyiliev/windows-python:latest
+      shell: powershell
+
+    - name: Image digest
+      run: |
+        docker inspect --format='{{index .RepoDigests 0}}' bobbyiliev/windows-python:latest
+      shell: powershell
